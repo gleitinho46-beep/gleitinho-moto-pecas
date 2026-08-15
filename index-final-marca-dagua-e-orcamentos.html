@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gleitinho Moto Peças - Orçamento</title>
+<style>
+  :root { --vermelho:#000000; --vermelho-claro:rgba(198,40,40,.10); }
+  *{box-sizing:border-box}
+  body{margin:0;background:#f2f2f2;font-family:Arial,Helvetica,sans-serif;color:#222}
+  .app{max-width:900px;margin:20px auto;padding:15px}
+  .panel{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 12px #0001}
+  h1{margin:0 0 18px;text-align:center;color:#000;font-size:25px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  label{font-weight:700;font-size:13px}
+  input,button,textarea{font:inherit}
+  input{width:100%;padding:10px;border:1px solid #bbb;border-radius:7px;margin-top:5px}
+  textarea{width:100%;min-height:85px;padding:10px;border:1px solid #bbb;border-radius:7px;margin-top:5px;resize:vertical}
+  .full{grid-column:1/-1}
+  table{width:100%;border-collapse:collapse;margin-top:18px;table-layout:fixed}
+  th,td{border:2px solid #000;padding:8px}
+  th{color:#000;background:#fff}
+  td input{width:100%;border:1px solid #bbb;border-radius:6px;margin:0;padding:9px;min-height:40px}
+  #itens th:nth-child(1){width:42%}
+  #itens th:nth-child(2){width:13%}
+  #itens th:nth-child(3){width:18%}
+  #itens th:nth-child(4){width:19%}
+  #itens th:nth-child(5){width:8%}
+  .total{text-align:right;font-size:21px;font-weight:700;color:#000;margin-top:15px}
+  .actions{display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+  button{border:0;border-radius:8px;padding:11px 18px;background:#000;color:#fff;font-weight:700;cursor:pointer}
+  .actions button:nth-child(1){background:#e67e22;color:#fff}
+  .actions button:nth-child(2){background:#f2c200;color:#111}
+  .actions button:nth-child(3){background:#1976d2;color:#fff}
+  .actions button:nth-child(4){background:#2e7d32;color:#fff}
+  button.sec{background:#2e7d32}
+  .hint{text-align:center;color:#666;font-size:12px;margin-top:10px}
+  #logoInput{padding:7px}
+
+  .settings{margin-top:16px;border-top:1px solid #ddd;padding-top:12px}
+  .settings-toggle{background:#555}
+  .settings-box{display:none;margin-top:10px;padding:12px;border:1px solid #ddd;border-radius:8px}
+  .settings-box.open{display:block}
+  .saved-list{margin-top:16px;border-top:1px solid #ddd;padding-top:12px}
+  .saved-outside{margin-top:12px}
+  .saved-outside-btn{width:100%;background:#7b1fa2;color:#fff}
+  .saved-outside-panel{display:none;margin-top:10px;padding:12px;border:1px solid #ddd;border-radius:8px;background:#fafafa}
+  .saved-outside-panel.open{display:block}
+  .saved-card{border:1px solid #ddd;border-radius:8px;padding:10px;margin-top:8px;background:#fafafa}
+  .saved-card b{display:block;margin-bottom:4px}
+  .saved-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+  .saved-actions button{padding:7px 10px;font-size:12px}
+  .empty-saved{color:#777;font-size:13px;margin-top:8px}
+  .preview{display:flex;justify-content:center;margin:8px 0}
+  .preview img{max-height:70px;max-width:260px;display:none}
+  @media(max-width:650px){
+    .grid{grid-template-columns:1fr}.full{grid-column:auto}
+    .panel{padding:14px;overflow:hidden}
+    #itens{
+      display:block;
+      width:100%;
+      table-layout:auto;
+      font-size:13px;
+    }
+    #itens thead,#itens tbody,#itens tr{width:100%}
+    #itens th,#itens td{padding:5px;vertical-align:middle}
+    #itens th:nth-child(1){width:38%}
+    #itens th:nth-child(2){width:13%}
+    #itens th:nth-child(3){width:20%}
+    #itens th:nth-child(4){width:20%}
+    #itens th:nth-child(5){width:9%}
+    #itens td:nth-child(1){min-width:0}
+    #itens td:nth-child(1) input{
+      display:block;
+      width:100%;
+      min-width:0;
+      height:44px;
+      font-size:15px;
+      padding:9px;
+    }
+    #itens td:nth-child(2) input{
+      display:block;
+      width:100%;
+      min-width:0;
+      height:44px;
+      font-size:15px;
+      padding:9px 6px;
+    }
+    #itens td:nth-child(3) input{
+      display:block;
+      width:100%;
+      min-width:0;
+      height:44px;
+      font-size:15px;
+      padding:9px 6px;
+    }
+    #itens td:nth-child(4){font-size:12px;white-space:nowrap}
+    #itens td:nth-child(5) button{padding:7px 8px}
+    #itens th{white-space:nowrap}
+  }
+  @media print{
+    body{background:#fff}
+    .app{max-width:none;margin:0;padding:0}
+    .panel{box-shadow:none;padding:0}
+    .no-print{display:none!important}
+    #orcamento{display:block!important}
+  }
+  #orcamento{position:relative;background:#fff;padding:24px;overflow:hidden}
+  .watermark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:0}
+  .watermark img{width:58%;max-height:55%;object-fit:contain;opacity:.08;filter:none}
+  .content{position:relative;z-index:1}
+  .head{display:flex;align-items:center;justify-content:center;min-height:75px;border-bottom:3px solid #000;padding-bottom:10px}
+  .head img{max-height:70px;max-width:280px;object-fit:contain}
+  .head .fallback{font-size:24px;font-weight:800;color:#000}
+  .orc-title{text-align:center;font-size:20px;font-weight:800;margin:14px 0;color:#000}
+  .info{border:2px solid #000;padding:10px;margin-bottom:10px}
+  .info div{margin:3px 0}
+  .print-table th,.print-table td{border:2px solid #000}
+  .print-table th{background:var(--vermelho-claro)}
+  .print-total{text-align:right;font-size:22px;font-weight:800;color:#000;margin-top:12px}
+  .rodape{text-align:center;margin-top:25px;font-size:12px}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+<div class="app">
+  <div class="panel no-print">
+    <h1>Gleitinho Moto Peças</h1>
+    <div class="grid">
+      <label>Cliente<input id="cliente"></label>
+      <label>Telefone<input id="telefone" type="tel" inputmode="numeric" maxlength="15" placeholder="(62) 99999-9999"></label>
+      <label>Moto<input id="moto"></label>
+      <label>Ano da moto<input id="ano" type="number" min="1900" max="2100"></label>
+      <label>Placa<input id="placa" type="text" autocapitalize="characters" maxlength="7" placeholder="ABC1D23"></label>
+      <label class="full">Observações<textarea id="observacoes" placeholder="KM, estado da moto ou outras informações"></textarea></label>
+
+    </div>
+
+    <table id="itens">
+      <thead><tr><th>Item</th><th style="width:70px">Qtd</th><th style="width:120px">Valor</th><th style="width:120px">Total</th><th style="width:50px">X</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="actions">
+      <button onclick="novoOrcamento()">+ Novo orçamento</button>
+      <button onclick="addItem()">+ Adicionar item</button>
+      <button onclick="gerarPDF()">Gerar PDF</button>
+      <button class="sec" onclick="salvarOrcamento()">Salvar orçamento</button>
+    </div>
+
+    <div class="saved-outside">
+      <button type="button" class="saved-outside-btn" onclick="toggleSavedOutside()">Orçamentos Salvos</button>
+      <div id="savedOutside" class="saved-outside-panel">
+        <b>Orçamentos salvos</b>
+        <div id="savedListOutside"></div>
+      </div>
+    </div>
+
+    <div class="settings">
+      <button type="button" class="settings-toggle" onclick="toggleSettings()">⚙ Configurações</button>
+      <div id="settingsBox" class="settings-box">
+        <label>Logo da marca
+          <input id="logoInput" type="file" accept="image/*">
+        </label>
+        <div class="preview"><img id="logoPreview"></div>
+        <div class="hint">A logo fica salva no navegador e aparece somente como marca-d'água.</div>
+        <div class="saved-list">
+          <b>Orçamentos salvos</b>
+          <div id="savedList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="orcamento" style="display:none;margin-top:20px">
+    <div class="watermark"><img id="wmLogo"></div>
+    <div class="content">
+      <div class="head">
+        <div class="fallback">Gleitinho Moto Peças</div>
+      </div>
+      <div class="orc-title">ORÇAMENTO</div>
+      <div class="info">
+        <div><b>Cliente:</b> <span id="pCliente"></span></div>
+        <div><b>Telefone:</b> <span id="pTelefone"></span></div>
+        <div><b>Moto:</b> <span id="pMoto"></span></div>
+        <div><b>Ano da moto:</b> <span id="pAno"></span></div>
+        <div><b>Placa:</b> <span id="pPlaca"></span></div>
+        <div><b>Observações:</b> <span id="pObservacoes"></span></div>
+      </div>
+      <table class="print-table">
+        <thead><tr><th>ITEM</th><th>QTD</th><th>VALOR</th><th>TOTAL</th></tr></thead>
+        <tbody id="pItens"></tbody>
+      </table>
+      <div class="print-total">TOTAL: <span id="pTotal"></span></div>
+      <div class="rodape">Gleitinho Moto Peças — (62) 98449-2207</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let logoData = localStorage.getItem('gleitinho_logo') || '';
+const brl = v => Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+
+function addItem(nome='',qtd=1,valor=''){
+  const tr=document.createElement('tr');
+  tr.innerHTML=`
+    <td><input class="nome" type="text" value="${nome.replace(/"/g,'&quot;')}" placeholder="Item / descrição" autocomplete="off"></td>
+    <td><input class="qtd" type="number" min="0" step="1" value="${qtd}"></td>
+    <td><input class="valor" type="text" inputmode="decimal" value="${valor}" placeholder="0,00" autocomplete="off"></td>
+    <td class="linha-total">R$ 0,00</td>
+    <td><button type="button" onclick="this.closest('tr').remove();recalcular()">X</button></td>`;
+  document.querySelector('#itens tbody').appendChild(tr);
+  tr.querySelectorAll('input').forEach(i=>i.addEventListener('input',recalcular));
+  recalcular();
+}
+function recalcular(){
+  document.querySelectorAll('#itens tbody tr').forEach(tr=>{
+    const q=Number(tr.querySelector('.qtd').value)||0;
+    const raw=tr.querySelector('.valor').value.trim().replace(/\s/g,'');
+    const v=Number(raw.replace(/\./g,'').replace(',','.'))||0;
+    tr.querySelector('.linha-total').textContent=brl(q*v);
+  });
+}
+
+function formatTelefoneInput(input){
+  let v=input.value.replace(/\D/g,'').slice(0,11);
+  if(v.length<=2){
+    input.value=v ? '('+v : '';
+  }else if(v.length<=7){
+    input.value='('+v.slice(0,2)+') '+v.slice(2);
+  }else{
+    input.value='('+v.slice(0,2)+') '+v.slice(2,7)+'-'+v.slice(7,11);
+  }
+}
+function formatPlacaInput(input){
+  input.value=input.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,7);
+}
+
+function salvarLogo(file){
+  const r=new FileReader();
+  r.onload=()=>{logoData=r.result;localStorage.setItem('gleitinho_logo',logoData);mostrarLogo()};
+  r.readAsDataURL(file);
+}
+function mostrarLogo(){
+  const prev=document.getElementById('logoPreview');
+  const wm=document.getElementById('wmLogo');
+  if(logoData){
+    prev.src=logoData;
+    prev.style.display='block';
+    wm.src=logoData;
+    wm.style.display='block';
+  }
+}
+document.getElementById('logoInput').addEventListener('change',e=>{if(e.target.files[0])salvarLogo(e.target.files[0])});
+document.getElementById('telefone').addEventListener('input',e=>formatTelefoneInput(e.target));
+document.getElementById('placa').addEventListener('input',e=>formatPlacaInput(e.target));
+function toggleSettings(){document.getElementById('settingsBox').classList.toggle('open');}
+
+function gerar(abrirImpressao=true){
+  document.getElementById('pCliente').textContent=document.getElementById('cliente').value;
+  document.getElementById('pTelefone').textContent=document.getElementById('telefone').value;
+  document.getElementById('pMoto').textContent=document.getElementById('moto').value;
+  document.getElementById('pAno').textContent=document.getElementById('ano').value;
+  document.getElementById('pPlaca').textContent=document.getElementById('placa').value;
+  document.getElementById('pObservacoes').textContent=document.getElementById('observacoes').value;
+  const out=document.getElementById('pItens'); out.innerHTML='';
+  let total=0;
+  document.querySelectorAll('#itens tbody tr').forEach(tr=>{
+    const nome=tr.querySelector('.nome').value;
+    const q=Number(tr.querySelector('.qtd').value)||0;
+    const raw=tr.querySelector('.valor').value.trim().replace(/\s/g,'');
+    const v=Number(raw.replace(/\./g,'').replace(',','.'))||0;
+    if(nome || q || v){
+      const t=q*v; total+=t;
+      out.innerHTML += `<tr><td>${nome}</td><td>${q}</td><td>${brl(v)}</td><td>${brl(t)}</td></tr>`;
+    }
+  });
+  document.getElementById('pTotal').textContent=brl(total);
+  mostrarLogo();
+  document.getElementById('orcamento').style.display='block';
+  window.scrollTo({top:document.getElementById('orcamento').offsetTop,behavior:'smooth'});
+  if(abrirImpressao) setTimeout(()=>window.print(),300);
+}
+
+async function gerarPDF(){
+  // Atualiza a prévia sem abrir a impressão do navegador.
+  gerar(false);
+
+  const jspdfLib = window.jspdf;
+  if(!jspdfLib || !jspdfLib.jsPDF){
+    alert('Não foi possível carregar o gerador de PDF. Verifique sua internet e tente novamente.');
+    return;
+  }
+
+  const { jsPDF } = jspdfLib;
+  const doc = new jsPDF({unit:'mm',format:'a4'});
+
+  // Marca-d'água: fundo muito discreto, desenhado antes de todo o conteúdo.
+  if(logoData){
+    try{
+      const fmt=logoData.startsWith('data:image/png')?'PNG':'JPEG';
+      doc.saveGraphicsState();
+      doc.setGState(new doc.GState({opacity:0.035}));
+      doc.addImage(logoData,fmt,70,105,70,50,undefined,'FAST');
+      doc.restoreGraphicsState();
+    }catch(e){}
+  }
+
+  const red = [0,0,0];
+  const black = [0,0,0];
+  let y = 18;
+
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(20);
+  doc.setTextColor(...red);
+  doc.text('Gleitinho Moto Peças',105,y,{align:'center'});
+  y += 8;
+
+  // Linha preta do cabeçalho.
+  doc.setDrawColor(...black);
+  doc.setLineWidth(0.6);
+  doc.line(15,y,195,y);
+  y += 10;
+
+  doc.setFontSize(16);
+  doc.setTextColor(...red);
+  doc.text('ORÇAMENTO',105,y,{align:'center'});
+  y += 10;
+
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(10);
+  doc.setTextColor(...black);
+
+  const info = [
+    ['Cliente:', document.getElementById('cliente').value],
+    ['Telefone:', document.getElementById('telefone').value],
+    ['Moto:', document.getElementById('moto').value],
+    ['Ano da moto:', document.getElementById('ano').value],
+    ['Placa:', document.getElementById('placa').value],
+    ['Observações:', document.getElementById('observacoes').value]
+  ];
+
+  info.forEach(([label,value])=>{
+    doc.setFont('helvetica','bold');
+    doc.text(label,18,y);
+    doc.setFont('helvetica','normal');
+    doc.text(String(value||''),47,y);
+    y += 6;
+  });
+
+  y += 4;
+
+  const rowH=8;
+  doc.setFillColor(245,245,245);
+  doc.setDrawColor(...black);
+  doc.setLineWidth(0.4);
+  doc.rect(15,y,180,rowH,'FD');
+  doc.setFont('helvetica','bold');
+  doc.text('ITEM',18,y+5.5);
+  doc.text('QTD',94,y+5.5);
+  doc.text('VALOR',116,y+5.5);
+  doc.text('TOTAL',169,y+5.5);
+  y += rowH;
+
+  let total=0;
+  getItens().forEach(item=>{
+    const q=Number(item.qtd)||0;
+    const raw=String(item.valor||'').trim().replace(/\s/g,'');
+    const v=Number(raw.replace(/\./g,'').replace(',','.'))||0;
+    const t=q*v;
+    total+=t;
+
+    if(y>275){
+      doc.addPage();
+      y=18;
+    }
+
+    doc.setFont('helvetica','normal');
+    doc.setDrawColor(...black);
+    doc.rect(15,y,180,rowH);
+    doc.text(String(item.nome||''),18,y+5.5,{maxWidth:68});
+    doc.text(String(q),94,y+5.5);
+    doc.text(brl(v),116,y+5.5);
+    doc.text(brl(t),169,y+5.5);
+    y += rowH;
+  });
+
+  y += 8;
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(14);
+  doc.setTextColor(...red);
+  doc.text('TOTAL: '+brl(total),195,y,{align:'right'});
+
+  const cliente=(document.getElementById('cliente').value||'cliente')
+    .replace(/[^a-z0-9áéíóúãõç _-]/gi,'')
+    .trim()
+    .replace(/\s+/g,'_');
+
+  const nomeArquivo='orcamento_gleitinho_'+(cliente||'cliente')+'.pdf';
+  const blob=doc.output('blob');
+  const url=URL.createObjectURL(blob);
+
+  // PRIMEIRO: abrir o próprio PDF. Assim o iPhone mostra o arquivo PDF,
+  // e não a página do site.
+  const pdfWindow = window.open(url, '_blank');
+
+  if(pdfWindow){
+    // Mantém a URL disponível por tempo suficiente para o Safari carregar o PDF.
+    setTimeout(()=>URL.revokeObjectURL(url), 60000);
+    return;
+  }
+
+  // Se o Safari bloquear a nova aba, compartilha o ARQUIVO PDF real.
+  const file=new File([blob],nomeArquivo,{type:'application/pdf'});
+  if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+    try{
+      await navigator.share({
+        title:'Orçamento Gleitinho Moto Peças',
+        files:[file]
+      });
+      return;
+    }catch(e){
+      if(e && e.name==='AbortError') return;
+    }
+  }
+
+  // Último recurso: baixar o arquivo PDF real.
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=nomeArquivo;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+}
+
+function getItens(){
+  return Array.from(document.querySelectorAll('#itens tbody tr'))
+    .map(tr=>({
+      nome: tr.querySelector('.nome').value.trim(),
+      qtd: tr.querySelector('.qtd').value,
+      valor: tr.querySelector('.valor').value
+    }))
+    .filter(i=>i.nome || Number(i.qtd)>0 && Number(i.valor)>0);
+}
+function getOrcamentoAtual(){
+  return {
+    id: Date.now().toString(),
+    cliente: document.getElementById('cliente').value,
+    telefone: document.getElementById('telefone').value,
+    moto: document.getElementById('moto').value,
+    ano: document.getElementById('ano').value,
+    placa: document.getElementById('placa').value,
+    observacoes: document.getElementById('observacoes').value,
+    logo: logoData,
+    itens: getItens(),
+    criadoEm: new Date().toLocaleString('pt-BR')
+  };
+}
+function salvarOrcamento(){
+  const o=getOrcamentoAtual();
+  const lista=JSON.parse(localStorage.getItem('gleitinho_orcamentos')||'[]');
+  const existente=lista.findIndex(x=>x.id===window.orcamentoAtualId);
+  if(existente>=0){o.id=window.orcamentoAtualId;lista[existente]=o}
+  else{lista.unshift(o);window.orcamentoAtualId=o.id}
+  localStorage.setItem('gleitinho_orcamentos',JSON.stringify(lista.slice(0,100)));
+  renderSavedList();
+  renderSavedListOutside();
+  alert('Orçamento salvo com sucesso.');
+}
+function novoOrcamento(){
+  window.orcamentoAtualId=null;
+  document.querySelector('#itens tbody').innerHTML='';
+  ['cliente','telefone','moto','ano','placa','observacoes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('orcamento').style.display='none';
+  addItem();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function carregarOrcamento(id){
+  const lista=JSON.parse(localStorage.getItem('gleitinho_orcamentos')||'[]');
+  const o=lista.find(x=>x.id===id);
+  if(!o)return;
+  window.orcamentoAtualId=o.id;
+  document.getElementById('cliente').value=o.cliente||'';
+  document.getElementById('telefone').value=o.telefone||'';
+  document.getElementById('moto').value=o.moto||'';
+  document.getElementById('ano').value=o.ano||'';
+  document.getElementById('placa').value=o.placa||'';
+  document.getElementById('observacoes').value=o.observacoes||'';
+  logoData=o.logo||localStorage.getItem("gleitinho_logo")||"";
+  document.querySelector('#itens tbody').innerHTML='';
+  (o.itens||[]).forEach(i=>addItem(i.nome||'',i.qtd||1,i.valor||''));
+  if(!(o.itens||[]).length)addItem();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function excluirOrcamento(id){
+  const lista=JSON.parse(localStorage.getItem('gleitinho_orcamentos')||'[]').filter(x=>x.id!==id);
+  localStorage.setItem('gleitinho_orcamentos',JSON.stringify(lista));
+  if(window.orcamentoAtualId===id)window.orcamentoAtualId=null;
+  renderSavedList();
+}
+function toggleSavedOutside(){
+  const panel=document.getElementById('savedOutside');
+  panel.classList.toggle('open');
+  renderSavedListOutside();
+}
+function renderSavedListOutside(){
+  const box=document.getElementById('savedListOutside');
+  if(!box)return;
+  const lista=JSON.parse(localStorage.getItem('gleitinho_orcamentos')||'[]');
+  if(!lista.length){box.innerHTML='<div class="empty-saved">Nenhum orçamento salvo.</div>';return}
+  box.innerHTML=lista.map(o=>`<div class="saved-card">
+    <b>${String(o.cliente||'Cliente sem nome').replace(/</g,'&lt;')}</b>
+    <div>${String([o.moto,o.ano].filter(Boolean).join(' • ')).replace(/</g,'&lt;')}</div>
+    <small>${o.criadoEm||''}</small>
+    <div class="saved-actions">
+      <button type="button" onclick="carregarOrcamento('${o.id}')">Abrir</button>
+      <button type="button" class="sec" onclick="excluirOrcamento('${o.id}')">Excluir</button>
+    </div>
+  </div>`).join('');
+}
+function renderSavedList(){
+  const box=document.getElementById('savedList');
+  if(!box)return;
+  const lista=JSON.parse(localStorage.getItem('gleitinho_orcamentos')||'[]');
+  if(!lista.length){box.innerHTML='<div class="empty-saved">Nenhum orçamento salvo.</div>';return}
+  box.innerHTML=lista.map(o=>{
+    const titulo=o.cliente||'Cliente sem nome';
+    const detalhe=[o.moto,o.ano].filter(Boolean).join(' • ');
+    return `<div class="saved-card">
+      <b>${titulo.replace(/</g,'&lt;')}</b>
+      <div>${detalhe.replace(/</g,'&lt;')}</div>
+      <small>${o.criadoEm}</small>
+      <div class="saved-actions">
+        <button type="button" onclick="carregarOrcamento('${o.id}')">Abrir</button>
+        <button type="button" class="sec" onclick="excluirOrcamento('${o.id}')">Excluir</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function limpar(){novoOrcamento();}
+addItem();
+mostrarLogo();
+renderSavedList();
+renderSavedListOutside();
+</script>
+</body>
+</html>
