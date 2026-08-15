@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gleitinho Moto Peças</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f6f8;color:#111;font-family:Arial,sans-serif}
+.app{max-width:760px;margin:auto;padding:14px 14px 35px}
+header{background:#f2c200;border:2px solid #111;border-radius:16px;padding:16px;text-align:center}
+header h1{margin:0;font-size:27px;font-weight:900}
+header p{margin:5px 0 0;font-weight:700}
+.card{background:#fff;border:1px solid #ddd;border-radius:14px;padding:15px;margin-top:14px;box-shadow:0 2px 8px #0000000d}
+h2{font-size:20px;margin:0 0 10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;font-weight:800;margin:10px 0 5px}
+input,textarea{width:100%;padding:12px;border:2px solid #c5c5c5;border-radius:10px;font-size:16px;background:#fff}
+textarea{min-height:90px;resize:vertical;font-family:Arial,sans-serif}
+.item{border:2px solid #ddd;border-radius:10px;padding:10px;margin-top:9px;background:#fafafa}
+.itemgrid{display:grid;grid-template-columns:minmax(0,2fr) 75px 105px 88px 42px;gap:6px;align-items:center}
+.itemgrid input{padding:9px}
+.itemtotal{font-weight:800;text-align:right;white-space:nowrap}
+button{border:0;border-radius:10px;padding:12px 14px;font-weight:800;font-size:15px}
+.remove{background:#d93025;color:#fff}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.add{background:#f2c200;color:#111}
+.new{background:#e67e22;color:#fff}
+.saved{background:#7b1fa2;color:#fff}
+.pdf{background:#1976d2;color:#fff}
+.save{background:#2e7d32;color:#fff;grid-column:1/-1}
+.settingsbtn{width:100%;background:#666;color:#fff;margin-top:10px}
+.total{margin-top:14px;padding:14px;background:#f2c200;border:2px solid #111;border-radius:10px;text-align:right;font-size:22px;font-weight:900}
+.panel{display:none;margin-top:10px;padding:12px;background:#fafafa;border:1px solid #ddd;border-radius:10px}
+.panel.open{display:block}
+.saved-card{padding:10px;border:1px solid #ddd;border-radius:9px;background:#fff;margin-top:8px}
+.saved-card b{display:block}
+.saved-card .small{color:#666;font-size:12px;margin-top:3px}
+.saved-card .row{display:flex;gap:7px;margin-top:8px}
+.saved-card button{padding:8px 10px;background:#222;color:#fff}
+.hint{font-size:12px;color:#666;margin-top:5px}
+.logo-preview{max-width:180px;max-height:80px;margin-top:8px;display:none}
+@media(max-width:600px){
+ .grid{grid-template-columns:1fr}
+ .itemgrid{grid-template-columns:1fr 70px 95px 88px 42px}
+ .itemgrid .name{grid-column:1/-1}
+ .actions{grid-template-columns:1fr 1fr}
+}
+@media print{.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+<h1>Gleitinho Moto Peças</h1>
+<p>Orçamento de peças e serviços</p>
+</header>
+
+<section class="card">
+<h2>Cliente</h2>
+<label>Nome</label><input id="cliente" type="text" placeholder="Nome do cliente">
+<label>Telefone</label><input id="telefone" type="tel" inputmode="numeric" maxlength="15" placeholder="(62) 99999-9999">
+</section>
+
+<section class="card">
+<h2>Moto</h2>
+<div class="grid">
+<div><label>Marca / Modelo</label><input id="moto" type="text" placeholder="Ex.: Honda Biz 125"></div>
+<div><label>Ano</label><input id="ano" type="text" inputmode="numeric" placeholder="2026"></div>
+</div>
+<label>Placa</label><input id="placa" type="text" maxlength="7" autocapitalize="characters" placeholder="ABC1D23">
+</section>
+
+<section class="card">
+<h2>Itens</h2>
+<div id="itens"></div>
+<button class="add no-print" onclick="adicionarItem()">＋ Adicionar item</button>
+<div class="total">Total: R$ <span id="total">0,00</span></div>
+</section>
+
+<section class="card">
+<h2>Observações</h2>
+<textarea id="observacoes" placeholder="KM, estado da moto, defeito relatado ou outras informações"></textarea>
+</section>
+
+<section class="card no-print">
+<div class="actions">
+<button class="add" onclick="adicionarItem()">＋ Adicionar item</button>
+<button class="new" onclick="novoOrcamento()">＋ Novo orçamento</button>
+<button class="saved" onclick="toggleSalvos()">▣ Orçamentos salvos</button>
+<button class="pdf" onclick="gerarPDF()">▱ Gerar PDF</button>
+<button class="save" onclick="salvarOrcamento()">▣ Salvar orçamento</button>
+</div>
+
+<button class="settingsbtn" onclick="toggleConfiguracoes()">⚙ Configurações</button>
+
+<div id="config" class="panel">
+<label>Logo / marca-d'água</label>
+<input id="logoInput" type="file" accept="image/*">
+<img id="logoPreview" class="logo-preview" alt="Logo">
+<div class="hint">A logo escolhida será usada como marca-d'água no PDF.</div>
+</div>
+
+<div id="salvos" class="panel">
+<strong>Orçamentos salvos</strong>
+<div id="savedList"></div>
+</div>
+</section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let editId=null;
+let logoData='';
+try{logoData=localStorage.getItem('gleitinho_logo')||'';}catch(e){}
+
+function moeda(n){return Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
+function valor(v){return Number(String(v||'').replace(',','.'))||0;}
+
+function formatTelefone(e){
+ let v=e.target.value.replace(/\D/g,'').slice(0,11);
+ if(v.length<=2)e.target.value=v?'('+v:'';
+ else if(v.length<=7)e.target.value='('+v.slice(0,2)+') '+v.slice(2);
+ else e.target.value='('+v.slice(0,2)+') '+v.slice(2,7)+'-'+v.slice(7);
+}
+function formatPlaca(e){
+ e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,7);
+}
+$('telefone').addEventListener('input',formatTelefone);
+if($('telefone').value) formatTelefone({target:$('telefone')});
+$('placa').addEventListener('input',formatPlaca);
+
+function adicionarItem(nome='',qtd=1,preco=''){
+ const div=document.createElement('div');
+ div.className='item';
+ div.innerHTML=`
+  <div class="itemgrid">
+   <input class="name" type="text" placeholder="Item / serviço">
+   <input class="qty" type="number" min="0" step="1" value="${qtd}">
+   <input class="price" type="text" inputmode="decimal" placeholder="0,00">
+   <div class="itemtotal">R$ 0,00</div>
+   <button class="remove" type="button">X</button>
+  </div>`;
+ div.querySelector('.name').value=nome;
+ div.querySelector('.price').value=preco;
+ div.querySelectorAll('input').forEach(x=>x.addEventListener('input',calcular));
+ div.querySelector('.remove').onclick=()=>{div.remove();calcular()};
+ $('itens').appendChild(div);
+ calcular();
+}
+function itens(){
+ return [...document.querySelectorAll('.item')].map(x=>({
+  nome:x.querySelector('.name').value.trim(),
+  qtd:Number(x.querySelector('.qty').value)||0,
+  preco:valor(x.querySelector('.price').value)
+ })).filter(x=>x.nome);
+}
+function calcular(){
+ let total=0;
+ document.querySelectorAll('.item').forEach(x=>{
+  const q=Number(x.querySelector('.qty').value)||0;
+  const p=valor(x.querySelector('.price').value);
+  const t=q*p; total+=t;
+  x.querySelector('.itemtotal').textContent=moeda(t);
+ });
+ $('total').textContent=total.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+ return total;
+}
+function dados(){
+ return {
+  id:editId||Date.now().toString(),
+  cliente:$('cliente').value,
+  telefone:$('telefone').value,
+  moto:$('moto').value,
+  ano:$('ano').value,
+  placa:$('placa').value,
+  observacoes:$('observacoes').value,
+  itens:itens(),
+  logo:logoData,
+  data:new Date().toLocaleString('pt-BR')
+ };
+}
+function salvarOrcamento(){
+ const d=dados();
+ let lista=JSON.parse((()=>{try{return localStorage.getItem('gleitinho_orcamentos')||'[]'}catch(e){return '[]'}})());
+ const i=lista.findIndex(x=>x.id===d.id);
+ if(i>=0)lista[i]=d;else lista.unshift(d);
+ try{localStorage.setItem('gleitinho_orcamentos',JSON.stringify(lista.slice(0,100)));}catch(e){}
+ editId=d.id; renderSalvos(); alert('Orçamento salvo com sucesso!');
+}
+function carregar(id){
+ const o=JSON.parse((()=>{try{return localStorage.getItem('gleitinho_orcamentos')||'[]'}catch(e){return '[]'}})()).find(x=>x.id===id);
+ if(!o)return;
+ editId=o.id;
+ $('cliente').value=o.cliente||'';
+ $('telefone').value=o.telefone||'';
+ $('moto').value=o.moto||'';
+ $('ano').value=o.ano||'';
+ $('placa').value=(o.placa||'').toUpperCase();
+ $('observacoes').value=o.observacoes||'';
+ $('itens').innerHTML='';
+ (o.itens||[]).forEach(x=>adicionarItem(x.nome,x.qtd,String(x.preco).replace('.',',')));
+ if(!o.itens?.length)adicionarItem();
+ logoData=o.logo||logoData;
+ mostrarLogo();
+ $('salvos').classList.remove('open');
+}
+function excluir(id){
+ let lista=JSON.parse((()=>{try{return localStorage.getItem('gleitinho_orcamentos')||'[]'}catch(e){return '[]'}})()).filter(x=>x.id!==id);
+ try{localStorage.setItem('gleitinho_orcamentos',JSON.stringify(lista));}catch(e){}
+ renderSalvos();
+}
+function renderSalvos(){
+ const lista=JSON.parse((()=>{try{return localStorage.getItem('gleitinho_orcamentos')||'[]'}catch(e){return '[]'}})());
+ $('savedList').innerHTML=lista.length?lista.map(o=>`
+  <div class="saved-card">
+   <b>${esc(o.cliente||'Cliente sem nome')}</b>
+   <div>${esc([o.moto,o.ano].filter(Boolean).join(' • '))}</div>
+   <div class="small">${esc(o.data||'')}</div>
+   <div class="row">
+    <button onclick="carregar('${esc(o.id)}')">Abrir</button>
+    <button onclick="excluir('${esc(o.id)}')">Excluir</button>
+   </div>
+  </div>`).join(''):'<div class="hint">Nenhum orçamento salvo.</div>';
+}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function toggleSalvos(){renderSalvos();$('salvos').classList.toggle('open');$('config').classList.remove('open');}
+function toggleConfiguracoes(){$('config').classList.toggle('open');$('salvos').classList.remove('open');}
+function novoOrcamento(){
+ editId=null;
+ ['cliente','telefone','moto','ano','placa','observacoes'].forEach(id=>$(id).value='');
+ $('itens').innerHTML=''; adicionarItem();
+}
+function mostrarLogo(){
+ if(logoData){$('logoPreview').src=logoData;$('logoPreview').style.display='block';}
+}
+$('logoInput').addEventListener('change',e=>{
+ const f=e.target.files?.[0]; if(!f)return;
+ const r=new FileReader();
+ r.onload=()=>{logoData=r.result;try{localStorage.setItem('gleitinho_logo',logoData);}catch(e){}mostrarLogo()};
+ r.readAsDataURL(f);
+});
+mostrarLogo();
+
+async function gerarPDF(){
+ if(!window.jspdf){alert('O gerador de PDF não carregou. Verifique a internet.');return;}
+ const {jsPDF}=window.jspdf;
+ const doc=new jsPDF({unit:'mm',format:'a4'});
+ let y=18;
+ if(logoData){
+  try{
+   const fmt=logoData.startsWith('data:image/png')?'PNG':'JPEG';
+   doc.addImage(logoData,fmt,55,75,100,70,undefined,'FAST');
+  }catch(e){}
+ }
+ doc.setTextColor(0,0,0);
+ doc.setFont('helvetica','bold');doc.setFontSize(20);
+ doc.text('Gleitinho Moto Peças',105,18,{align:'center'});
+ doc.setFont('helvetica','normal');doc.setFontSize(10);
+ doc.text('ORÇAMENTO',105,25,{align:'center'});
+ y=37;
+ const info=[
+  ['Cliente', $('cliente').value],
+  ['Telefone', $('telefone').value],
+  ['Moto', $('moto').value],
+  ['Ano', $('ano').value],
+  ['Placa', $('placa').value]
+ ];
+ info.forEach(([a,b])=>{doc.setFont('helvetica','bold');doc.text(a+':',18,y);doc.setFont('helvetica','normal');doc.text(String(b||''),48,y);y+=6;});
+ y+=3;
+ doc.setFont('helvetica','bold');doc.text('Itens',18,y);y+=7;
+ doc.setFillColor(242,194,0);doc.rect(15,y-5,180,8,'F');
+ doc.setTextColor(0,0,0);doc.setFontSize(9);
+ doc.text('ITEM',18,y);doc.text('QTD',105,y);doc.text('VALOR',125,y);doc.text('TOTAL',168,y);y+=7;
+ let total=0;
+ itens().forEach(it=>{
+  const t=it.qtd*it.preco;total+=t;
+  if(y>275){doc.addPage();y=18;}
+  doc.setFont('helvetica','normal');
+  doc.text(String(it.nome).slice(0,48),18,y);
+  doc.text(String(it.qtd),105,y);
+  doc.text(moeda(it.preco),125,y);
+  doc.text(moeda(t),168,y);
+  y+=7;
+ });
+ y+=3;
+ doc.setFont('helvetica','bold');doc.setFontSize(13);
+ doc.text('TOTAL: '+moeda(total),195,y,{align:'right'});
+ y+=12;
+ doc.setFontSize(10);doc.text('Observações:',18,y);y+=6;
+ doc.setFont('helvetica','normal');
+ const obs=doc.splitTextToSize($('observacoes').value||'Nenhuma.',165);
+ doc.text(obs,18,y);
+ doc.save('orcamento-gleitinho.pdf');
+}
+
+adicionarItem();
+renderSalvos();
+</script>
+</body>
+</html>
