@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Gleitinho Moto Peças - Orçamento</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+
+*{box-sizing:border-box}
+
+body{
+
+  margin:0;
+
+  font-family:Arial,sans-serif;
+
+  background:#fff;
+
+  color:#111;
+
+}
+
+.app{
+
+  max-width:760px;
+
+  margin:auto;
+
+  padding:18px;
+
+  padding-bottom:40px;
+
+}
+
+header{
+
+  text-align:center;
+
+  border-bottom:4px solid #111;
+
+  padding:8px 0 18px;
+
+  margin-bottom:22px;
+
+}
+
+.logo{
+
+  width:58px;
+
+  height:58px;
+
+  background:#111;
+
+  color:#fff;
+
+  border-radius:50%;
+
+  display:inline-flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  font-size:22px;
+
+  font-weight:bold;
+
+  margin-bottom:8px;
+
+}
+
+h1{
+
+  margin:0;
+
+  font-size:28px;
+
+}
+
+.subtitle{
+
+  margin-top:5px;
+
+  color:#666;
+
+  font-size:15px;
+
+}
+
+label{
+
+  display:block;
+
+  font-size:18px;
+
+  font-weight:bold;
+
+  margin:15px 0 7px;
+
+}
+
+input,textarea{
+
+  width:100%;
+
+  border:2px solid #bbb;
+
+  border-radius:12px;
+
+  padding:14px;
+
+  font-size:17px;
+
+  background:#fff;
+
+}
+
+textarea{
+
+  min-height:90px;
+
+  resize:vertical;
+
+}
+
+.phone-area{
+
+  display:flex;
+
+  gap:8px;
+
+}
+
+.phone-area input{
+
+  flex:1;
+
+}
+
+button{
+
+  border:0;
+
+  border-radius:12px;
+
+  padding:14px 18px;
+
+  font-size:17px;
+
+  font-weight:bold;
+
+  cursor:pointer;
+
+}
+
+.whatsapp{
+
+  background:#25D366;
+
+  color:white;
+
+}
+
+table{
+
+  width:100%;
+
+  border-collapse:collapse;
+
+  margin-top:22px;
+
+}
+
+th,td{
+
+  border:2px solid #111;
+
+  padding:9px 5px;
+
+  text-align:center;
+
+}
+
+th{
+
+  background:#111;
+
+  color:white;
+
+}
+
+td:first-child{
+
+  text-align:left;
+
+}
+
+.total{
+
+  text-align:right;
+
+  font-size:22px;
+
+  font-weight:bold;
+
+  margin:18px 0;
+
+}
+
+.actions{
+
+  display:grid;
+
+  grid-template-columns:1fr 1fr;
+
+  gap:12px;
+
+  margin-top:15px;
+
+}
+
+.add{
+
+  background:#f2c83d;
+
+  color:#111;
+
+}
+
+.new{
+
+  background:#e88932;
+
+  color:white;
+
+}
+
+.pdf{
+
+  background:#3978d4;
+
+  color:white;
+
+}
+
+.save{
+
+  background:#43853c;
+
+  color:white;
+
+}
+
+.obs{
+
+  margin-top:15px;
+
+}
+
+.remove{
+
+  background:#d9534f;
+
+  color:white;
+
+  padding:7px 10px;
+
+  font-size:14px;
+
+}
+
+.item-input{
+
+  border:0;
+
+  padding:5px;
+
+  font-size:15px;
+
+  width:100%;
+
+}
+
+.qty-input,.price-input{
+
+  width:75px;
+
+  padding:7px;
+
+  font-size:15px;
+
+  text-align:center;
+
+}
+
+footer{
+
+  text-align:center;
+
+  color:#777;
+
+  margin-top:30px;
+
+  font-size:14px;
+
+}
+
+@media(max-width:600px){
+
+  .actions{
+
+    grid-template-columns:1fr 1fr;
+
+  }
+
+  th,td{
+
+    font-size:14px;
+
+  }
+
+  .phone-area{
+
+    flex-direction:column;
+
+  }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+
+  <div class="logo">GM</div>
+
+  <h1>Gleitinho Moto Peças</h1>
+
+  <div class="subtitle">Orçamento de peças e serviços</div>
+
+</header>
+
+<label>Cliente</label>
+
+<input id="cliente" type="text" placeholder="Nome do cliente">
+
+<label>Telefone</label>
+
+<div class="phone-area">
+
+  <input id="telefone" type="tel" placeholder="(62) 99999-9999">
+
+  <button class="whatsapp" onclick="abrirWhatsApp()">WhatsApp</button>
+
+</div>
+
+<label>Moto</label>
+
+<input id="moto" type="text" placeholder="Ex.: Honda CG 160 Titan">
+
+<label>Ano da moto</label>
+
+<input id="ano" type="text" placeholder="Ex.: 2024">
+
+<label>Placa</label>
+
+<input id="placa" type="text" placeholder="ABC1D23">
+
+<label>Observações</label>
+
+<textarea id="observacoes" placeholder="Digite aqui observações sobre o orçamento, peças ou serviço..."></textarea>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Item</th>
+
+<th>Qtd</th>
+
+<th>Valor</th>
+
+<th>Total</th>
+
+<th>X</th>
+
+</tr>
+
+</thead>
+
+<tbody id="itens"></tbody>
+
+</table>
+
+<div class="total">
+
+Total: R$ <span id="total">0,00</span>
+
+</div>
+
+<div class="actions">
+
+<button class="add" onclick="adicionarItem()">
+
++ Adicionar item
+
+</button>
+
+<button class="new" onclick="novoOrcamento()">
+
++ Novo orçamento
+
+</button>
+
+<button class="pdf" onclick="gerarPDF()">
+
+Gerar PDF
+
+</button>
+
+<button class="save" onclick="salvarOrcamento()">
+
+Salvar orçamento
+
+</button>
+
+</div>
+
+<footer>
+
+Gleitinho Moto Peças<br>
+
+Orçamento gerado pelo sistema
+
+</footer>
+
+</div>
+
+<script>
+
+let contador=0;
+
+function adicionarItem(){
+
+  contador++;
+
+  const tbody=document.getElementById("itens");
+
+  const tr=document.createElement("tr");
+
+  tr.innerHTML=`
+
+    <td>
+
+      <input class="item-input" placeholder="Descrição do item">
+
+    </td>
+
+    <td>
+
+      <input class="qty-input" type="number" value="1" min="1"
+
+      oninput="calcular()">
+
+    </td>
+
+    <td>
+
+      <input class="price-input" type="number" value="0" step="0.01"
+
+      oninput="calcular()">
+
+    </td>
+
+    <td class="subtotal">R$ 0,00</td>
+
+    <td>
+
+      <button class="remove" onclick="this.closest('tr').remove();calcular()">
+
+      X
+
+      </button>
+
+    </td>
+
+  `;
+
+  tbody.appendChild(tr);
+
+  calcular();
+
+}
+
+function calcular(){
+
+  let total=0;
+
+  document.querySelectorAll("#itens tr").forEach(tr=>{
+
+    const qtd=parseFloat(tr.querySelector(".qty-input").value)||0;
+
+    const valor=parseFloat(tr.querySelector(".price-input").value)||0;
+
+    const subtotal=qtd*valor;
+
+    tr.querySelector(".subtotal").innerText=
+
+      "R$ "+subtotal.toFixed(2).replace(".",",");
+
+    total+=subtotal;
+
+  });
+
+  document.getElementById("total").innerText=
+
+    total.toFixed(2).replace(".",",");
+
+}
+
+function abrirWhatsApp(){
+
+  let telefone=document.getElementById("telefone").value;
+
+  let numero=telefone.replace(/\D/g,"");
+
+  if(numero.length===11){
+
+    numero="55"+numero;
+
+  }
+
+  if(!numero){
+
+    alert("Digite o telefone primeiro.");
+
+    return;
+
+  }
+
+  window.open(
+
+    "https://wa.me/"+numero,
+
+    "_blank"
+
+  );
+
+}
+
+function novoOrcamento(){
+
+  if(!confirm("Deseja começar um novo orçamento?")){
+
+    return;
+
+  }
+
+  document.getElementById("cliente").value="";
+
+  document.getElementById("telefone").value="";
+
+  document.getElementById("moto").value="";
+
+  document.getElementById("ano").value="";
+
+  document.getElementById("placa").value="";
+
+  document.getElementById("observacoes").value="";
+
+  document.getElementById("itens").innerHTML="";
+
+  calcular();
+
+}
+
+function salvarOrcamento(){
+
+  const dados={
+
+    cliente:document.getElementById("cliente").value,
+
+    telefone:document.getElementById("telefone").value,
+
+    moto:document.getElementById("moto").value,
+
+    ano:document.getElementById("ano").value,
+
+    placa:document.getElementById("placa").value,
+
+    observacoes:document.getElementById("observacoes").value,
+
+    data:new Date().toLocaleString("pt-BR")
+
+  };
+
+  localStorage.setItem(
+
+    "orcamentoGleitinho",
+
+    JSON.stringify(dados)
+
+  );
+
+  alert("Orçamento salvo!");
+
+}
+
+function gerarPDF(){
+
+  const {jsPDF}=window.jspdf;
+
+  const doc=new jsPDF();
+
+  let y=20;
+
+  doc.setFontSize(20);
+
+  doc.setFont(undefined,"bold");
+
+  doc.text("GLEITINHO MOTO PECAS",105,y,{align:"center"});
+
+  y+=8;
+
+  doc.setFontSize(11);
+
+  doc.setFont(undefined,"normal");
+
+  doc.text("Orcamento de pecas e servicos",105,y,{align:"center"});
+
+  y+=15;
+
+  doc.setFontSize(12);
+
+  const cliente=document.getElementById("cliente").value;
+
+  const telefone=document.getElementById("telefone").value;
+
+  const moto=document.getElementById("moto").value;
+
+  const ano=document.getElementById("ano").value;
+
+  const placa=document.getElementById("placa").value;
+
+  const observacoes=document.getElementById("observacoes").value;
+
+  doc.text("Cliente: "+cliente,15,y);
+
+  y+=8;
+
+  doc.text("Telefone: "+telefone,15,y);
+
+  y+=8;
+
+  doc.text("Moto: "+moto,15,y);
+
+  y+=8;
+
+  doc.text("Ano: "+ano,15,y);
+
+  y+=8;
+
+  doc.text("Placa: "+placa,15,y);
+
+  y+=12;
+
+  doc.setFont(undefined,"bold");
+
+  doc.text("Itens:",15,y);
+
+  y+=8;
+
+  doc.setFont(undefined,"normal");
+
+  let total=0;
+
+  document.querySelectorAll("#itens tr").forEach((tr,index)=>{
+
+    const item=tr.querySelector(".item-input").value;
+
+    const qtd=parseFloat(tr.querySelector(".qty-input").value)||0;
+
+    const valor=parseFloat(tr.querySelector(".price-input").value)||0;
+
+    const subtotal=qtd*valor;
+
+    total+=subtotal;
+
+    doc.text(
+
+      (index+1)+". "+item+" | Qtd: "+qtd+
+
+      " | R$ "+valor.toFixed(2)+
+
+      " | Total: R$ "+subtotal.toFixed(2),
+
+      15,y
+
+    );
+
+    y+=7;
+
+    if(y>270){
+
+      doc.addPage();
+
+      y=20;
+
+    }
+
+  });
+
+  y+=5;
+
+  doc.setFont(undefined,"bold");
+
+  doc.setFontSize(15);
+
+  doc.text(
+
+    "TOTAL: R$ "+total.toFixed(2),
+
+    195,y,
+
+    {align:"right"}
+
+  );
+
+  y+=15;
+
+  doc.setFontSize(12);
+
+  doc.text("Observacoes:",15,y);
+
+  y+=7;
+
+  doc.setFont(undefined,"normal");
+
+  const linhas=doc.splitTextToSize(
+
+    observacoes || "Nenhuma observacao.",
+
+    175
+
+  );
+
+  doc.text(linhas,15,y);
+
+  doc.save("orcamento_gleitinho.pdf");
+
+}
+
+adicionarItem();
+
+</script>
+
+</body>
+
+</html>
